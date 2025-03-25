@@ -1,0 +1,20 @@
+:last-update-label!:
+
+== Docker 02 - Fonctionnement des conteneurs
+
+=== 1. Objectifs
+
+Cette section se concentre un peu plus sur la commande _docker run_, ses options, et le fonctionnement des conteneurs.
+
+* Utiliser certaines options de la commande `docker run`
+* Comprendre le rôle des _tags_ d'image
+* Visualiser les informations d'un conteneur
+* Notions associées : _tags_, mapping de ports, inspection de conteneurs, visualisation de _logs_
+
+=== 2. Notes de cours
+
+xref:./cours.adoc[Lien vers les notes de cours]
+
+=== 3. Le TP
+
+xref:./tp.adoc[Lien vers le TP]

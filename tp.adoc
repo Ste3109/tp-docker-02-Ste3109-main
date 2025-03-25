@@ -1,0 +1,134 @@
+:last-update-label!:
+
+== Fonctionnement des conteneurs - TP
+
+=== 1. Méthodologie de rendu
+
+Suivez ces xref:./methodologie_tp.adoc[instructions habituelles.]
+
+=== 2. Questions
+
+*01* En une seule commande, lancez un conteneur `ubuntu` et exécutez dessus une commande permettant de voir la version d'Ubuntu utilisée. Pourquoi cette version particulière a-t-elle été utilisée ?
+
+* Car c'est la dernière version publier d'ubuntu.
+
+[source,shell]
+----
+$ docker run ubuntu cat /etc/os-release
+PRETTY_NAME="Ubuntu 24.04.1 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.1 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+----
+
+''''
+
+*02* Même chose mais cette fois on veut spécifiquement lancer l'image Ubuntu 20.04.
+
+[source,shell]
+----
+$ docker run ubuntu:20.04 cat /etc/os-release
+Unable to find image 'ubuntu:20.04' locally
+20.04: Pulling from library/ubuntu
+d9802f032d67: Download complete
+Digest: sha256:8e5c4f0285ecbb4ead070431d29b576a530d3166df73ec44affc1cd27555141b
+Status: Downloaded newer image for ubuntu:20.04
+NAME="Ubuntu"
+VERSION="20.04.6 LTS (Focal Fossa)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 20.04.6 LTS"
+VERSION_ID="20.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=focal
+UBUNTU_CODENAME=focal
+----
+
+''''
+
+*03* Jenkins est un outil d'_intégration continue_ (compilation automatique de code source sur l'infrastructure de déploiement) très populaire. Trouvez une image maintenue de Jenkins et lancer spécifiquement la version LTS (_Long Term Support_) en mode détaché.
+
+[source,shell]
+----
+$ docker run -d -p 8080:8080 -p 50000:50000 jenkins/jenkins:lts
+Unable to find image 'jenkins/jenkins:lts' locally
+lts: Pulling from jenkins/jenkins
+2101411f4e14: Download complete
+098e6cd28a3d: Download complete
+187d98c68c0a: Download complete
+0be2444c0a64: Download complete
+cfe6e8049b20: Download complete
+a492eee5e559: Download complete
+bba1a160bb54: Download complete
+a36abae8f559: Download complete
+15c4963bfd8e: Download complete
+2b2f9df68344: Download complete
+695ab411b701: Download complete
+aaad395e4e83: Download complete
+Digest: sha256:01ccf53ac68037a1dc5aff50bf2336e6a672532cbe2536dcb91ccb86447894ad
+Status: Downloaded newer image for jenkins/jenkins:lts
+c97570935c82c26679871cd4f0142f9c6ff1d163266aa17de6227047b44ec66c
+----
+
+''''
+
+*04* Une fois lancé, Jenkins utilise deux ports différents sur la machine. Utilisez `ps` sur le conteneur lancé pour voir les deux ports utilisés par le conteneur Jenkins. Puis documentez-vous pour savoir à quoi servent ces deux ports.
+
+[source,shell]
+----
+$ docker exec c97570 ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+jenkins      1  0.0  0.0   2472   920 ?        Ss   10:35   0:00 /usr/bin/tini -- /usr/local/bin/jenkins.sh
+jenkins      7 29.2 10.4 7762848 837432 ?      Sl   10:35   0:39 java -Duser.home=/var/jenkins_home -Djenkins.model.Jenkins.slaveAgentPort=50000 -Dhudson.lifecycle=hudson.lifecycle.ExitLifecycle -jar /usr/share/jenkins/jenkins.war
+jenkins    128  100  0.0   8480  4220 ?        Rs   10:38   0:00 ps aux
+----
+
+''''
+
+*05* On veut accéder à l'interface web de Jenkins. On a deux solutions. La première serait d'utiliser le réseau Docker (son IP interne) pour accéder directement au conteneur. Utiliser `docker inspect` pour trouver l'IP interne du conteneur. En ajoutant le port adéquat, quelle serait alors l'adresse à utiliser pour accéder à Jenkins ? Note : *cette solution ne fonctionne que sous Linux*, Windows n'ayant pas directement accès à ce réseau.
+
+[source,shell]
+----
+$ 
+----
+
+''''
+
+La deuxième solution est de mapper le port correspondant du conteneur sur un port de la machine hôte. On pourra ainsi y accéder via ce port qui retransmettra les requêtes vers le conteneur.
+
+*06* Commencez par arrêter le conteneur car on ne peut pas ajouter le mapping de port une fois que le conteneur est créé. Relancez un nouveau conteneur appelé `jenkins-map` en mappant le port du service web de Jenkins (conteneur) au port `8888` de la machine hôte. Depuis l'hôte, sur quelle adresse pouvez-vous ensuite accéder à la page de configuration de Jenkins ? Vérifiez que le service répond bien à cette adresse.
+
+[source,shell]
+----
+$ 
+----
+
+''''
+
+*07* Combien de conteneurs avez-vous en tout ? Nettoyage : arrêtez et supprimez tous les conteneurs dont vous n'avez plus besoin.
+
+[source,shell]
+----
+$ 
+----
+
+''''
+
+*08* Relancez la même chose qu'en question 06 et arrangez-vous pour que le conteneur Jenkins soit automatiquement supprimé une fois qu'il est arrêté. Arrêtez le conteneur et vérifiez qu'il a bien été supprimé.
+
+[source,shell]
+----
+$ 
+----

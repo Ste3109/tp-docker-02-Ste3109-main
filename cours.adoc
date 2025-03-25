@@ -1,0 +1,128 @@
+:last-update-label!:
+
+== Fonctionnement des conteneurs - Notes de cours
+
+=== 1. Les _tags_
+
+On connaît déjà la commande `docker run` qui permet de lancer un conteneur à partir d'une image.
+
+[source,shell]
+----
+$ docker run redis
+Using default tag: latest
+latest: Pulling from library/redis
+f7e2b70d04ae: Pull complete
+...
+----
+
+Comme on le voit ici, *par défaut*, la commande `run` lance un conteneur en utilisant *l'image la plus récente*. C'est celle qui est marquée `latest` (_Using default tag: latest_). Une image a donc toujours une partie qui vient compléter le nom, séparée par `:`. Ici c'est donc `redis:latest`. Pour spécifier une autre version spécifique de l'application, il faut ajouter explicitement un autre *tag* à l'image :
+
+[source,shell]
+----
+$ docker run redis:4.0
+4.0: Pulling from library/redis
+e44f5e2f24e1: Pull complete
+Status: Downloaded newer image for redis:4.0
+...
+----
+
+Ce `:4.0` est un *tag*. Il indique une version spécifique de l'image `redis`. On peut aussi spécifier explicitement l'image la plus récente : `redis:latest` mais, de nouveau, c'est le comportement par défaut.
+
+Comment savoir quelles versions sont disponibles pour une image donnée ? On peut se rendre sur le *Docker Hub* et consulter les *tags* disponibles pour l'image en question. Exemple pour https://hub.docker.com/_/redis[l'image `redis`].
+
+=== 2. Le mapping de ports
+
+Lançons un serveur web _nginx_ en mode détaché :
+
+[source,shell]
+----
+$ docker run -d nginx
+----
+
+Problème : comme ça, on ne peut pas accéder au site web, car le conteneur est isolé du réseau de l'hôte (en tout cas sous Windows). Pour accéder à la page web, il faut _mapper_ le port du conteneur vers un port de l'hôte. On utilise l'option `-p` (_publish_) pour cela. Il faut indiquer le port de l'hôte, puis le port du conteneur, séparés par deux points (_hostport:containerport_) :
+
+[source,shell]
+----
+$ docker run -d -p 8080:80 nginx
+----
+
+Maintenant, on peut accéder à la page web de nginx (port 80 du conteneur) via le port 8080 de l'hôte. La commande `docker ps` permet de voir les ports mappés des différents conteneurs.
+
+Cela permet de facilement faire tourner plusieurs instances d'une application sur le même hôte, chacune étant mappée sur un port différent de l'hôte. Par exemple :
+
+[source,shell]
+----
+$ docker run -d -p 8080:80 nginx
+$ docker run -d -p 8081:80 nginx
+----
+
+=== 3. Inspecter un conteneur
+
+La commande `docker ps` est utile pour voir rapidement quelques détails des conteneurs qui tournent. Mais pour voir plus de détails sur un conteneur, on utilise la commande `docker inspect`, à laquelle on passe le nom ou l'ID du conteneur :
+
+[source,shell]
+----
+$ docker inspect mon_conteneur
+----
+
+La sortie de cette commande est un document JSON qui contient de nombreuses informations sur le conteneur, comme son état, les ports mappés, les variables d'environnement, etc. :
+
+[source,json]
+----
+[
+  {
+    "Id": "f7b3f2b3b4c3",
+    "Created": "2021-10-01T14:20:00.000000000Z",
+    "Path": "nginx",
+    "Args": [
+      "-g",
+      "daemon off;"
+    ],
+    "State": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 1234,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2021-10-01T14:20:00.000000000Z",
+      "FinishedAt": "0001-01-01T00:00:00.000000000Z"
+    },
+    ...
+  }
+]
+----
+
+Souvenez-vous de cette possibilité lorsque vous aurez besoin de plus d'informations sur un conteneur, notamment lorsqu'il y a un problème.
+
+=== 4. Voir les logs d'un conteneur
+
+Lorsque vous lancez un conteneur en mode détaché (`-d`), vous ne voyez pas les *logs* de l'application, c'est-à-dire ici les messages qui s'affichent normalement sur le terminal et qui peuvent notamment indiquer un potentiel problème ou bien d'autres informations importantes. Pour voir les logs, vous pouvez utiliser la commande `docker logs`, à laquelle vous passez le nom ou l'ID du conteneur :
+
+[source,shell]
+----
+$ docker logs mon_conteneur
+----
+
+Si vous voulez voir les logs en temps réel, vous pouvez ajouter l'option `-f` (_follow_) :
+
+[source,shell]
+----
+$ docker logs -f mon_conteneur
+----
+
+Cela permet de voir pendant un temps voulu les logs de plusieurs conteneurs qui tournent en mode détaché, sans avoir à les arrêter ou à les relancer en mode attaché.
+
+=== 5. Suppression automatique de conteneur
+
+Vous savez que lorqu'un conteneur est arrêté, il reste dans l'état _exited_ et peut être relancé à tout moment. Si vous voulez qu'un conteneur soit supprimé automatiquement lorsqu'il est arrêté (_one-time container_), vous pouvez ajouter l'option `--rm` à la commande `docker run` :
+
+[source,shell]
+----
+$ docker run --rm mon_conteneur
+----
+
+Clea évite de se retrouver avec des conteneurs inutiles qui traînent sur la machine lorsqu'on est sûr de ne pas avoir besoin de les relancer.
