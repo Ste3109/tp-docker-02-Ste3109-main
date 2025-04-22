@@ -101,7 +101,16 @@ jenkins    128  100  0.0   8480  4220 ?        Rs   10:38   0:00 ps aux
 
 [source,shell]
 ----
-$ 
+$ docker inspect c975
+[
+  #[...]
+        "NetworkSettings": {
+            #[...]
+            "IPAddress": "172.17.0.2",
+            
+        }
+
+]
 ----
 
 ''''
@@ -110,18 +119,46 @@ La deuxième solution est de mapper le port correspondant du conteneur sur un po
 
 *06* Commencez par arrêter le conteneur car on ne peut pas ajouter le mapping de port une fois que le conteneur est créé. Relancez un nouveau conteneur appelé `jenkins-map` en mappant le port du service web de Jenkins (conteneur) au port `8888` de la machine hôte. Depuis l'hôte, sur quelle adresse pouvez-vous ensuite accéder à la page de configuration de Jenkins ? Vérifiez que le service répond bien à cette adresse.
 
+* "localhost:8888" car la machine host c'est nous-même.
+
 [source,shell]
 ----
-$ 
+$ docker stop c9
+c9
+$ docker rm c9
+c9
+$ docker run -d --name jenkins-map -p 8888:8080 jenkins/jenkins:lts
+af51fd6e407e187c88367a80ab76b7d6e691eb8a0cc307190e03a91256554629
+$ docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                                              NAMES
+af51fd6e407e   jenkins/jenkins:lts   "/usr/bin/tini -- /u…"   8 seconds ago   Up 7 seconds   50000/tcp, 0.0.0.0:8888->8080/tcp   jenkins-map
 ----
 
 ''''
 
 *07* Combien de conteneurs avez-vous en tout ? Nettoyage : arrêtez et supprimez tous les conteneurs dont vous n'avez plus besoin.
 
+* Il y a 10 conteneur dont 9 utilisées dans d'autre activité donc je vais supprimmé le container jenkins.
+
 [source,shell]
 ----
-$ 
+$ docker ps -a
+CONTAINER ID   IMAGE                 COMMAND                  CREATED          STATUS                      PORTS                                        NAMES
+af51fd6e407e   jenkins/jenkins:lts   "/usr/bin/tini -- /u…"   10 minutes ago   Up 10 minutes               50000/tcp, 0.0.0.0:8888->8080/tcp            jenkins-map
+e5d6fcbcee96   ubuntu:20.04          "cat /etc/os-release"    3 weeks ago      Exited (0) 3 weeks ago                                                   dazzling_meninsky
+b301b042326e   ubuntu                "cat /etc/os-release"    3 weeks ago      Exited (0) 3 weeks ago                                                   compassionate_kepler
+4a660b95f8d3   hello-world           "/hello"                 6 weeks ago      Exited (0) 6 weeks ago                                                   elastic_swartz
+d26e03ff8bd1   nginx:latest          "/docker-entrypoint.…"   5 months ago     Exited (255) 6 weeks ago    80/tcp                                       tp1-web-4
+467c502c9396   nginx:latest          "/docker-entrypoint.…"   5 months ago     Exited (255) 7 weeks ago    80/tcp                                       tp1-web-5
+b2b8e109d7c2   nginx:latest          "/docker-entrypoint.…"   5 months ago     Exited (255) 7 weeks ago    80/tcp                                       tp1-web-1
+56065ce19bac   nginx:latest          "/docker-entrypoint.…"   5 months ago     Exited (255) 7 weeks ago    80/tcp                                       tp1-web-3
+8b6ccee6dd75   nginx:latest          "/docker-entrypoint.…"   5 months ago     Exited (255) 7 weeks ago    80/tcp                                       tp1-web-2
+16b2e2554ef5   traefik:v3.2          "/entrypoint.sh --ap…"   5 months ago     Exited (255) 7 weeks ago    0.0.0.0:80->80/tcp, 0.0.0.0:8080->8080/tcp   tp1-reverse-proxy-1
+010fd57643c5   monsite               "/docker-entrypoint.…"   6 months ago     Exited (255) 5 months ago   0.0.0.0:32768->80/tcp                        interesting_tharp
+$ docker stop af5
+af5
+$ docker rm af5
+af5
 ----
 
 ''''
@@ -130,5 +167,16 @@ $
 
 [source,shell]
 ----
-$ 
+$ docker run -d --rm --name jenkins-map -p 8888:8080 jenkins/jenkins:lts
+04115a042a90942d7a049838056a1bd7a86d46f99ff9a49e392c1cd2d448d558
+
+$ docker ps
+CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                               NAMES
+04115a042a90   jenkins/jenkins:lts   "/usr/bin/tini -- /u…"   6 seconds ago   Up 6 seconds   50000/tcp, 0.0.0.0:8888->8080/tcp   jenkins-map
+
+$ docker stop 0411
+0411
+
+$ docker ps -a
+CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                               NAMES
 ----
